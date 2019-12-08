@@ -7,7 +7,7 @@ import java.io.File
 import chisel3.iotesters
 import chisel3.iotesters.{ChiselFlatSpec, Driver, PeekPokeTester}
 
-class GCDUnitTester(c: GCD) extends PeekPokeTester(c) {
+class SysArrayMMUnitTester(c: SisArrayMM) extends PeekPokeTester(c) {
   /**
     * compute the gcd and the number of steps it should take to do it
     *
@@ -15,7 +15,8 @@ class GCDUnitTester(c: GCD) extends PeekPokeTester(c) {
     * @param b positive integer
     * @return the GCD of a and b
     */
-  def computeGcd(a: Int, b: Int): (Int, Int) = {
+    /*
+  def computeSysArrayMM(a: Int, b: Int): (Int, Int) = {
     var x = a
     var y = b
     var depth = 1
@@ -48,6 +49,7 @@ class GCDUnitTester(c: GCD) extends PeekPokeTester(c) {
       expect(gcd.io.outputValid, 1)
     }
   }
+     */
 }
 
 /**
@@ -61,7 +63,7 @@ class GCDUnitTester(c: GCD) extends PeekPokeTester(c) {
   * sbt 'testOnly gcd.GCDTester'
   * }}}
   */
-class GCDTester extends ChiselFlatSpec {
+class SisArrayMMTester extends ChiselFlatSpec {
   // Disable this until we fix isCommandAvailable to swallow stderr along with stdout
   private val backendNames = if(firrtl.FileUtils.isCommandAvailable(Seq("verilator", "--version"))) {
     Array("firrtl", "verilator")
@@ -71,29 +73,29 @@ class GCDTester extends ChiselFlatSpec {
   }
   for ( backendName <- backendNames ) {
     "GCD" should s"calculate proper greatest common denominator (with $backendName)" in {
-      Driver(() => new GCD, backendName) {
-        c => new GCDUnitTester(c)
+      Driver(() => new SisArrayMM(32,3), backendName) {
+        c => new SysArrayMMUnitTester(c)
       } should be (true)
     }
   }
 
   "Basic test using Driver.execute" should "be used as an alternative way to run specification" in {
-    iotesters.Driver.execute(Array(), () => new GCD) {
-      c => new GCDUnitTester(c)
+    iotesters.Driver.execute(Array(), () => new SisArrayMM(32,3)) {
+      c => new SysArrayMMUnitTester(c)
     } should be (true)
   }
 
   if(backendNames.contains("verilator")) {
     "using --backend-name verilator" should "be an alternative way to run using verilator" in {
-      iotesters.Driver.execute(Array("--backend-name", "verilator"), () => new GCD) {
-        c => new GCDUnitTester(c)
+      iotesters.Driver.execute(Array("--backend-name", "verilator"), () => new SisArrayMM(32,3)) {
+        c => new SysArrayMMUnitTester(c)
       } should be(true)
     }
   }
 
   "running with --is-verbose" should "show more about what's going on in your tester" in {
-    iotesters.Driver.execute(Array("--is-verbose"), () => new GCD) {
-      c => new GCDUnitTester(c)
+    iotesters.Driver.execute(Array("--is-verbose"), () => new SisArrayMM(32,3)) {
+      c => new SysArrayMMUnitTester(c)
     } should be(true)
   }
 
@@ -105,10 +107,10 @@ class GCDTester extends ChiselFlatSpec {
   "running with --generate-vcd-output on" should "create a vcd file from your test" in {
     iotesters.Driver.execute(
       Array("--generate-vcd-output", "on", "--target-dir", "test_run_dir/make_a_vcd", "--top-name", "make_a_vcd"),
-      () => new GCD
+      () => new SisArrayMM(32, 3)
     ) {
 
-      c => new GCDUnitTester(c)
+      c => new SysArrayMMUnitTester(c)
     } should be(true)
 
     new File("test_run_dir/make_a_vcd/make_a_vcd.vcd").exists should be (true)
@@ -118,14 +120,15 @@ class GCDTester extends ChiselFlatSpec {
     iotesters.Driver.execute(
       Array("--generate-vcd-output", "off", "--target-dir", "test_run_dir/make_no_vcd", "--top-name", "make_no_vcd",
       "--backend-name", "verilator"),
-      () => new GCD
+      () => new SisArrayMM(32, 3)
     ) {
 
-      c => new GCDUnitTester(c)
+      c => new SysArrayMMUnitTester(c)
     } should be(true)
 
     new File("test_run_dir/make_no_vcd/make_a_vcd.vcd").exists should be (false)
 
   }
+
 
 }
