@@ -90,5 +90,5 @@ class SysArrayMM (val data_size: Int, val grid_size: Int) extends Module {
 
 
 object SysArrayMM extends App {
-  chisel3.Driver.execute(Array("-td", "verilog"), () => new SysArrayMM(32, 2))
+  chisel3.Driver.execute(Array("-td", "verilog"), () => new SysArrayMM(32, 3))
 }
